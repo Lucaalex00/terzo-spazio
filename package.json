@@ -1,0 +1,26 @@
+{
+  "name": "terzo-spazio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Terzo Spazio di Giulia Bordino — mobile-first website for an esthetician, with a chakra-inspired design.",
+  "author": "Lucaalex00 (https://github.com/Lucaalex00)",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/web",
+    "build": "npm run build -w apps/web",
+    "start": "npm run start -w apps/web",
+    "lint": "npm run lint -w apps/web",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,css,md}\"",
+    "format:check": "prettier --check \"apps/**/*.{ts,tsx,css,md}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  }
+}

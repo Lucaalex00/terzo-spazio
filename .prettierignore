@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+dist
+build
+coverage
+*.min.*
+package-lock.json
+
+# Repo Forge locked constitution files: never rewritten by tooling
+# (change them only via /repo-forge:change).
+apps/web/CLAUDE.md
+apps/web/AGENTS.md

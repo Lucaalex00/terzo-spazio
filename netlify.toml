@@ -1,0 +1,14 @@
+# Netlify configuration for the Terzo Spazio monorepo.
+# The public site lives in apps/web; Netlify builds it from there.
+
+[build]
+  base = "apps/web"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Official Next.js runtime for Netlify (adapts App Router, ISR, image, etc.).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

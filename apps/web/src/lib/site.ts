@@ -42,7 +42,7 @@ export const site = {
   },
 
   author: {
-    name: "Lucaalex00",
+    name: "Luca",
     url: "https://github.com/Lucaalex00",
   },
 } as const;

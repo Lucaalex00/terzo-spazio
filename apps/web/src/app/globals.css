@@ -3,6 +3,7 @@
 :root {
   --background: #faf7f2;
   --foreground: #1f1b16;
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @theme inline {
@@ -12,10 +13,7 @@
   --font-display: var(--font-display);
 }
 
-/* Elegant display font for headings and the brand. */
-.font-display {
-  font-family: var(--font-display), Georgia, "Times New Roman", serif;
-}
+/* ------------------------------------------------------------------ base */
 
 html {
   scroll-behavior: smooth;
@@ -27,7 +25,330 @@ body {
   font-family: var(--font-sans), system-ui, Arial, sans-serif;
 }
 
-/* Respect users who prefer reduced motion: neutralize animations/transitions. */
+.font-display {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--glow, #f2c230) 35%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent, var(--foreground));
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+/* ------------------------------------------------------------ components */
+/* Layered so Tailwind utilities (e.g. px-4, text-xs) can still override them. */
+
+@layer components {
+  /* Frosted card that glows with its section's chakra on hover. */
+  .chakra-card {
+    position: relative;
+    border-radius: 1.5rem;
+    border: 1px solid rgb(255 255 255 / 0.7);
+    background: rgb(255 255 255 / 0.62);
+    backdrop-filter: blur(16px) saturate(140%);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.04),
+      0 10px 30px -14px rgb(0 0 0 / 0.1);
+    transition:
+      translate 0.5s var(--ease-soft),
+      border-color 0.5s var(--ease-soft),
+      box-shadow 0.5s var(--ease-soft);
+  }
+
+  .chakra-card:hover {
+    translate: 0 -3px;
+    border-color: color-mix(in srgb, var(--glow, #ccc) 55%, white);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.04),
+      0 22px 44px -20px color-mix(in srgb, var(--glow, #999) 70%, transparent);
+  }
+
+  .chakra-chip {
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--glow, #ccc) 35%, transparent);
+    background: rgb(255 255 255 / 0.55);
+    padding: 0.3rem 0.75rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.8rem 1.6rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition:
+      translate 0.35s var(--ease-soft),
+      box-shadow 0.35s var(--ease-soft),
+      background-color 0.35s var(--ease-soft),
+      filter 0.35s var(--ease-soft);
+  }
+
+  .btn-primary {
+    color: white;
+    background: var(--accent, var(--foreground));
+    box-shadow: 0 12px 28px -12px var(--glow, rgb(0 0 0 / 0.4));
+  }
+
+  .btn-primary:hover {
+    translate: 0 -2px;
+    filter: brightness(1.08);
+    box-shadow: 0 18px 34px -12px var(--glow, rgb(0 0 0 / 0.45));
+  }
+
+  .btn-ghost {
+    color: #3f3a34;
+    border: 1px solid rgb(0 0 0 / 0.12);
+    background: rgb(255 255 255 / 0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  .btn-ghost:hover {
+    translate: 0 -2px;
+    background: rgb(255 255 255 / 0.85);
+  }
+
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .link-arrow::after {
+    content: "→";
+    transition: translate 0.35s var(--ease-soft);
+  }
+
+  .link-arrow:hover::after {
+    translate: 4px 0;
+  }
+
+  .field {
+    width: 100%;
+    border-radius: 0.9rem;
+    border: 1px solid rgb(0 0 0 / 0.12);
+    background: rgb(255 255 255 / 0.8);
+    padding: 0.65rem 0.85rem;
+    color: #1f1b16;
+    transition:
+      border-color 0.3s,
+      box-shadow 0.3s;
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--glow, #999) 25%, transparent);
+  }
+}
+
+/* ------------------------------------------------------- chakra motion */
+
+/* One breath = 6s: expand while inhaling, release while exhaling. */
+@keyframes chakra-breathe {
+  0%,
+  100% {
+    scale: 0.95;
+  }
+  50% {
+    scale: 1.04;
+  }
+}
+
+.chakra-breathe {
+  transform-origin: center;
+  animation: chakra-breathe 6s ease-in-out infinite;
+}
+
+@keyframes chakra-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.chakra-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chakra-spin 120s linear infinite;
+}
+
+@keyframes chakra-ripple {
+  0% {
+    scale: 0.7;
+    opacity: 0.5;
+  }
+  100% {
+    scale: 1.7;
+    opacity: 0;
+  }
+}
+
+.chakra-ripple {
+  animation: chakra-ripple 6s ease-out infinite;
+}
+
+@keyframes chakra-pulse {
+  0% {
+    scale: 0.6;
+    opacity: 0.55;
+  }
+  100% {
+    scale: 2.2;
+    opacity: 0;
+  }
+}
+
+.chakra-pulse {
+  animation: chakra-pulse 2.4s ease-out infinite;
+}
+
+@keyframes chakra-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.chakra-blink {
+  animation: chakra-blink 2s ease-in-out infinite;
+}
+
+/* Breath guide: "inspira" during the first half of the cycle, "espira" after. */
+.breath-guide {
+  display: grid;
+}
+
+.breath-guide > span {
+  grid-area: 1 / 1;
+}
+
+/* Full shorthands on purpose: the CSS build collapses name-less animation
+   longhands into `animation: none`. */
+.breath-guide > .breath-in {
+  animation: breath-in 6s ease-in-out infinite;
+}
+
+.breath-guide > .breath-out {
+  animation: breath-out 6s ease-in-out infinite;
+}
+
+@keyframes breath-in {
+  0%,
+  42% {
+    opacity: 1;
+  }
+  50%,
+  92% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes breath-out {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  50%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Aurora orbs drift slowly so the light never feels static. */
+@keyframes aurora-a {
+  from {
+    translate: 0 0;
+    scale: 1;
+  }
+  to {
+    translate: 8vw 6vh;
+    scale: 1.15;
+  }
+}
+
+@keyframes aurora-b {
+  from {
+    translate: 0 0;
+    scale: 1.1;
+  }
+  to {
+    translate: -10vw -8vh;
+    scale: 0.95;
+  }
+}
+
+@keyframes aurora-c {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 6vw -10vh;
+  }
+}
+
+.aurora-a {
+  animation: aurora-a 22s ease-in-out infinite alternate;
+}
+
+.aurora-b {
+  animation: aurora-b 28s ease-in-out infinite alternate;
+}
+
+.aurora-c {
+  animation: aurora-c 34s ease-in-out infinite alternate;
+}
+
+/* Fine film grain over the aurora. */
+.grain {
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes scroll-cue {
+  0% {
+    scale: 1 0;
+    transform-origin: top;
+  }
+  50% {
+    scale: 1 1;
+    transform-origin: top;
+  }
+  51% {
+    transform-origin: bottom;
+  }
+  100% {
+    scale: 1 0;
+    transform-origin: bottom;
+  }
+}
+
+.scroll-cue-line {
+  animation: scroll-cue 2.4s var(--ease-soft) infinite;
+}
+
+/* ------------------------------------------------------ reduced motion */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -36,5 +357,15 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Keep a calm, static invitation instead of the animated breath guide. */
+  .breath-out {
+    display: none;
+  }
+
+  .breath-in {
+    animation: none !important;
+    opacity: 1;
   }
 }

@@ -16,3 +16,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Local SEO: metadata, sitemap, robots, `BeautySalon` JSON-LD.
 - GDPR: cookie consent gate for Google Analytics 4, privacy and cookie policies.
 - Constitution documents and structure lock.
+- Chakra experience redesign: procedural lotus glyphs with traditional petal
+  counts, inner geometry and bija syllables; breathing hero with a guided
+  "inspira / espira" rhythm; aurora background with film grain; scroll-filled
+  energy channel; cursor light; blur-to-focus reveals; floating glass header.
+
+### Changed
+- Chakra palette split into `light` (glows) and `ink` (text, WCAG AA).
+- Author credit shown as "Luca" (links to github.com/Lucaalex00).
+- Service cards numbered instead of emoji icons.

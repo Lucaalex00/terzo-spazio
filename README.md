@@ -65,4 +65,4 @@ are documented in the root constitution files and locked via
 
 ## Author
 
-Created and maintained by [**Lucaalex00**](https://github.com/Lucaalex00).
+Created and maintained by [**Luca**](https://github.com/Lucaalex00).

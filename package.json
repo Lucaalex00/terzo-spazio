@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Terzo Spazio di Giulia Bordino — mobile-first website for an esthetician, with a chakra-inspired design.",
-  "author": "Lucaalex00 (https://github.com/Lucaalex00)",
+  "author": "Luca (https://github.com/Lucaalex00)",
   "license": "UNLICENSED",
   "workspaces": [
     "apps/*",

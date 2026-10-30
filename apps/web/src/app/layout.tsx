@@ -10,6 +10,7 @@ import { Header } from "@/components/Header/Header";
 import { Footer } from "@/components/Footer/Footer";
 import { WhatsAppFab } from "@/components/WhatsAppFab/WhatsAppFab";
 import { JsonLd } from "@/components/JsonLd/JsonLd";
+import { MotionProvider } from "@/components/MotionProvider/MotionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,15 +59,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="it" className={`${geistSans.variable} ${marcellus.variable} h-full antialiased`}>
       <body className="relative min-h-full">
         <JsonLd />
-        <ConsentProvider>
-          <ChakraBackground />
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <WhatsAppFab />
-          <CookieConsent />
-          <Analytics />
-        </ConsentProvider>
+        <MotionProvider>
+          <ConsentProvider>
+            <ChakraBackground />
+            <Header />
+            <main>{children}</main>
+            <Footer />
+            <WhatsAppFab />
+            <CookieConsent />
+            <Analytics />
+          </ConsentProvider>
+        </MotionProvider>
       </body>
     </html>
   );

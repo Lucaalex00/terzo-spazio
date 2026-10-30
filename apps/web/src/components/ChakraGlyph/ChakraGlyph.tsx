@@ -162,8 +162,8 @@ export function ChakraGlyph({
 
       <circle
         r={R_BASE - 2}
-        fill="white"
-        fillOpacity={0.55}
+        fill="#0c0812"
+        fillOpacity={0.6}
         stroke="currentColor"
         strokeWidth={1.6}
       />
@@ -171,7 +171,7 @@ export function ChakraGlyph({
 
       {showBija && chakra.geometry !== "square" && (
         // Soft disc so geometry lines never cross the seed syllable.
-        <circle r={chakra.geometry === "circle" ? 13 : 18} fill="white" fillOpacity={0.9} />
+        <circle r={chakra.geometry === "circle" ? 13 : 18} fill="#0c0812" fillOpacity={0.88} />
       )}
       {showBija && (
         <text
@@ -182,7 +182,7 @@ export function ChakraGlyph({
           className="font-display"
           fontSize={chakra.geometry === "square" ? 15 : chakra.geometry === "circle" ? 10 : 12}
           letterSpacing={1}
-          fill={chakra.ink}
+          fill={chakra.soft}
         >
           {chakra.bija}
         </text>

@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * NOTE: always write `animation` as a full shorthand that includes the
+ * keyframes name. The CSS build collapses name-less animation longhands
+ * into `animation: none`.
+ */
+
 :root {
-  --background: #faf7f2;
-  --foreground: #1f1b16;
+  --background: #07060b;
+  --foreground: #f4efe9;
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -30,7 +37,8 @@ body {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--glow, #f2c230) 35%, transparent);
+  background: color-mix(in srgb, var(--glow, #f2c230) 45%, transparent);
+  color: white;
 }
 
 :focus-visible {
@@ -43,77 +51,151 @@ body {
 /* Layered so Tailwind utilities (e.g. px-4, text-xs) can still override them. */
 
 @layer components {
-  /* Frosted card that glows with its section's chakra on hover. */
+  /* Readable light text over the moving tunnel. */
+  .text-glow {
+    text-shadow:
+      0 2px 24px rgb(0 0 0 / 0.6),
+      0 0 2px rgb(0 0 0 / 0.45);
+  }
+
+  /* A beam of chakra light sweeps across the text every few seconds. */
+  .text-shimmer {
+    background-image: linear-gradient(
+      110deg,
+      #fff 0%,
+      #fff 40%,
+      var(--accent, #fff) 50%,
+      #fff 60%,
+      #fff 100%
+    );
+    background-size: 250% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: text-shimmer 6s var(--ease-soft) infinite;
+  }
+
+  /* Put this on the PARENT of .text-shimmer: a filter on the clipped element
+     itself can hide the gradient in Chromium. */
+  .drop-glow {
+    filter: drop-shadow(0 2px 18px rgb(0 0 0 / 0.55));
+  }
+
+  .glass-dark {
+    border: 1px solid rgb(255 255 255 / 0.12);
+    background: rgb(12 9 18 / 0.55);
+    backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 10px 40px -12px rgb(0 0 0 / 0.6);
+  }
+
+  /* Dark glass card. Lights up with its chakra when it reaches the center of
+     the screen (data-focus, set by Reveal) — no hover needed on phones. */
   .chakra-card {
     position: relative;
     border-radius: 1.5rem;
-    border: 1px solid rgb(255 255 255 / 0.7);
-    background: rgb(255 255 255 / 0.62);
-    backdrop-filter: blur(16px) saturate(140%);
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.04),
-      0 10px 30px -14px rgb(0 0 0 / 0.1);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(12 9 18 / 0.58);
+    backdrop-filter: blur(12px) saturate(140%);
+    box-shadow: 0 10px 40px -16px rgb(0 0 0 / 0.7);
     transition:
-      translate 0.5s var(--ease-soft),
-      border-color 0.5s var(--ease-soft),
-      box-shadow 0.5s var(--ease-soft);
+      translate 0.6s var(--ease-soft),
+      border-color 0.6s var(--ease-soft),
+      box-shadow 0.6s var(--ease-soft),
+      background-color 0.6s var(--ease-soft);
   }
 
+  .chakra-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 12% auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glow, #fff), transparent);
+    opacity: 0.35;
+    transition: opacity 0.6s var(--ease-soft);
+  }
+
+  [data-focus="true"] > .chakra-card,
+  .chakra-card[data-focus="true"],
   .chakra-card:hover {
     translate: 0 -3px;
-    border-color: color-mix(in srgb, var(--glow, #ccc) 55%, white);
+    border-color: color-mix(in srgb, var(--glow, #fff) 55%, transparent);
+    background-color: rgb(16 11 24 / 0.66);
     box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.04),
-      0 22px 44px -20px color-mix(in srgb, var(--glow, #999) 70%, transparent);
+      0 0 0 1px color-mix(in srgb, var(--glow, #fff) 20%, transparent),
+      0 24px 60px -20px color-mix(in srgb, var(--glow, #fff) 65%, transparent);
+  }
+
+  [data-focus="true"] > .chakra-card::before,
+  .chakra-card[data-focus="true"]::before,
+  .chakra-card:hover::before {
+    opacity: 1;
   }
 
   .chakra-chip {
     border-radius: 9999px;
-    border: 1px solid color-mix(in srgb, var(--glow, #ccc) 35%, transparent);
-    background: rgb(255 255 255 / 0.55);
+    border: 1px solid color-mix(in srgb, var(--glow, #fff) 40%, transparent);
+    background: rgb(12 9 18 / 0.45);
     padding: 0.3rem 0.75rem;
     backdrop-filter: blur(8px);
   }
 
   .btn-primary,
   .btn-ghost {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     border-radius: 9999px;
-    padding: 0.8rem 1.6rem;
+    padding: 0.85rem 1.7rem;
     font-size: 0.875rem;
     font-weight: 600;
     transition:
       translate 0.35s var(--ease-soft),
-      box-shadow 0.35s var(--ease-soft),
       background-color 0.35s var(--ease-soft),
       filter 0.35s var(--ease-soft);
   }
 
+  /* Primary CTA: chakra light, a breathing glow and a periodic sheen. */
   .btn-primary {
-    color: white;
-    background: var(--accent, var(--foreground));
-    box-shadow: 0 12px 28px -12px var(--glow, rgb(0 0 0 / 0.4));
+    color: #140d17;
+    background: var(--glow, #f4efe9);
+    animation: glow-breathe 6s ease-in-out infinite;
+  }
+
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.65) 50%,
+      transparent 70%
+    );
+    translate: -120% 0;
+    animation: btn-sheen 4.5s var(--ease-soft) infinite;
   }
 
   .btn-primary:hover {
     translate: 0 -2px;
     filter: brightness(1.08);
-    box-shadow: 0 18px 34px -12px var(--glow, rgb(0 0 0 / 0.45));
   }
 
   .btn-ghost {
-    color: #3f3a34;
-    border: 1px solid rgb(0 0 0 / 0.12);
-    background: rgb(255 255 255 / 0.5);
+    color: #f4efe9;
+    border: 1px solid rgb(255 255 255 / 0.22);
+    background: rgb(255 255 255 / 0.06);
     backdrop-filter: blur(10px);
   }
 
   .btn-ghost:hover {
     translate: 0 -2px;
-    background: rgb(255 255 255 / 0.85);
+    background: rgb(255 255 255 / 0.12);
   }
 
   .link-arrow {
@@ -125,35 +207,97 @@ body {
     color: var(--accent);
   }
 
+  /* The arrow gently nudges on its own: a cue that works without hover. */
   .link-arrow::after {
     content: "→";
-    transition: translate 0.35s var(--ease-soft);
-  }
-
-  .link-arrow:hover::after {
-    translate: 4px 0;
+    animation: arrow-nudge 2.4s var(--ease-soft) infinite;
   }
 
   .field {
     width: 100%;
     border-radius: 0.9rem;
-    border: 1px solid rgb(0 0 0 / 0.12);
-    background: rgb(255 255 255 / 0.8);
-    padding: 0.65rem 0.85rem;
-    color: #1f1b16;
+    border: 1px solid rgb(255 255 255 / 0.16);
+    background: rgb(255 255 255 / 0.06);
+    padding: 0.7rem 0.9rem;
+    color: #f4efe9;
     transition:
       border-color 0.3s,
       box-shadow 0.3s;
   }
 
+  .field::placeholder {
+    color: rgb(255 255 255 / 0.4);
+  }
+
+  .field option {
+    background: #140d17;
+    color: #f4efe9;
+  }
+
   .field:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--glow, #999) 25%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--glow, #999) 30%, transparent);
+  }
+
+  .fab-ring {
+    animation: fab-ring 2.6s ease-out infinite;
   }
 }
 
-/* ------------------------------------------------------- chakra motion */
+/* ------------------------------------------------------------ keyframes */
+
+@keyframes text-shimmer {
+  0%,
+  55% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    box-shadow: 0 10px 30px -10px var(--glow, rgb(255 255 255 / 0.4));
+  }
+  50% {
+    box-shadow: 0 14px 44px -6px var(--glow, rgb(255 255 255 / 0.6));
+  }
+}
+
+@keyframes btn-sheen {
+  0%,
+  60% {
+    translate: -120% 0;
+  }
+  100% {
+    translate: 120% 0;
+  }
+}
+
+@keyframes arrow-nudge {
+  0%,
+  60%,
+  100% {
+    translate: 0 0;
+  }
+  75% {
+    translate: 5px 0;
+  }
+}
+
+@keyframes fab-ring {
+  0% {
+    scale: 1;
+    opacity: 0.6;
+  }
+  100% {
+    scale: 1.7;
+    opacity: 0;
+  }
+}
 
 /* One breath = 6s: expand while inhaling, release while exhaling. */
 @keyframes chakra-breathe {
@@ -177,6 +321,27 @@ body {
   }
 }
 
+/* Logo: the sun breathes with the site's rhythm, the rays glow softly. */
+.logo-sun {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chakra-breathe 6s ease-in-out infinite;
+}
+
+@keyframes logo-rays {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.logo-rays {
+  animation: logo-rays 6s ease-in-out infinite;
+}
+
 .chakra-spin {
   transform-box: fill-box;
   transform-origin: center;
@@ -186,7 +351,7 @@ body {
 @keyframes chakra-ripple {
   0% {
     scale: 0.7;
-    opacity: 0.5;
+    opacity: 0.55;
   }
   100% {
     scale: 1.7;
@@ -201,7 +366,7 @@ body {
 @keyframes chakra-pulse {
   0% {
     scale: 0.6;
-    opacity: 0.55;
+    opacity: 0.6;
   }
   100% {
     scale: 2.2;
@@ -236,8 +401,6 @@ body {
   grid-area: 1 / 1;
 }
 
-/* Full shorthands on purpose: the CSS build collapses name-less animation
-   longhands into `animation: none`. */
 .breath-guide > .breath-in {
   animation: breath-in 6s ease-in-out infinite;
 }
@@ -272,57 +435,6 @@ body {
   100% {
     opacity: 0;
   }
-}
-
-/* Aurora orbs drift slowly so the light never feels static. */
-@keyframes aurora-a {
-  from {
-    translate: 0 0;
-    scale: 1;
-  }
-  to {
-    translate: 8vw 6vh;
-    scale: 1.15;
-  }
-}
-
-@keyframes aurora-b {
-  from {
-    translate: 0 0;
-    scale: 1.1;
-  }
-  to {
-    translate: -10vw -8vh;
-    scale: 0.95;
-  }
-}
-
-@keyframes aurora-c {
-  from {
-    translate: 0 0;
-  }
-  to {
-    translate: 6vw -10vh;
-  }
-}
-
-.aurora-a {
-  animation: aurora-a 22s ease-in-out infinite alternate;
-}
-
-.aurora-b {
-  animation: aurora-b 28s ease-in-out infinite alternate;
-}
-
-.aurora-c {
-  animation: aurora-c 34s ease-in-out infinite alternate;
-}
-
-/* Fine film grain over the aurora. */
-.grain {
-  opacity: 0.045;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @keyframes scroll-cue {

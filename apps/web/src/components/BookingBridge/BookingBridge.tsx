@@ -33,8 +33,8 @@ export function BookingBridge() {
 
   return (
     <div className="chakra-card p-6">
-      <h3 className="font-display text-xl text-neutral-900">Prenota il tuo momento</h3>
-      <p className="mt-2 text-pretty text-sm leading-relaxed text-neutral-600">
+      <h3 className="font-display text-xl text-white">Prenota il tuo momento</h3>
+      <p className="mt-2 text-pretty text-sm leading-relaxed text-white/70">
         Scegli un servizio e, se vuoi, aggiungi una nota. Ti porteremo{" "}
         {external ? "all'app di prenotazione" : "su WhatsApp con un messaggio già pronto"} — la
         prenotazione vera e propria la gestisce Giulia direttamente.
@@ -42,7 +42,7 @@ export function BookingBridge() {
 
       <div className="mt-4 grid gap-4">
         <label className="grid gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Servizio</span>
+          <span className="font-medium text-white/90">Servizio</span>
           <select
             value={serviceSlug}
             onChange={(e) => setServiceSlug(e.target.value)}
@@ -58,7 +58,7 @@ export function BookingBridge() {
 
         {!external && (
           <label className="grid gap-1 text-sm">
-            <span className="font-medium text-neutral-800">Nota (facoltativa)</span>
+            <span className="font-medium text-white/90">Nota (facoltativa)</span>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -74,12 +74,10 @@ export function BookingBridge() {
             {external ? "Vai a prenotare" : "Scrivi su WhatsApp"}
           </a>
         ) : (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-white/55">
             Canale di contatto non ancora configurato. Imposta
-            <code className="mx-1 rounded bg-neutral-100 px-1">
-              NEXT_PUBLIC_WHATSAPP_NUMBER
-            </code>o{" "}
-            <code className="mx-1 rounded bg-neutral-100 px-1">NEXT_PUBLIC_BOOKING_URL</code>.
+            <code className="mx-1 rounded bg-white/10 px-1">NEXT_PUBLIC_WHATSAPP_NUMBER</code>o{" "}
+            <code className="mx-1 rounded bg-white/10 px-1">NEXT_PUBLIC_BOOKING_URL</code>.
           </p>
         )}
       </div>

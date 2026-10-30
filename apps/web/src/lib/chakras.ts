@@ -1,20 +1,19 @@
 /**
  * The five-chakra design system.
  *
- * The site is built as a vertical scroll of five sections. Each section is
+ * The site is a journey through five chakras (root → throat). Each section is
  * tied to one chakra, which gives it its lotus glyph, its dot on the energy
- * rail, its colors, its background mood and its seed syllable. As a section
- * enters the viewport its dot lights up and the ambient aurora drifts toward
- * that chakra's light.
+ * channel, its seed syllable and — above all — the color of the light tunnel
+ * the visitor travels through while that section is on screen.
  *
  * The symbolism follows the traditional iconography: petal count, bija
- * (seed) mantra, element and inner geometry of each chakra lotus. We use five
- * chakras (root → throat) to match the project's concept of five dots.
+ * (seed) mantra, element and inner geometry of each chakra lotus.
  *
- * Two colors per chakra:
- * - `light`: the luminous hue, used for glows, glyphs, aurora and dots.
- * - `ink`:   a deeper shade of the same hue, used for text and buttons so
- *            they meet WCAG 2.1 AA contrast on the soft background.
+ * Three tones per chakra (the site uses a dark, immersive theme):
+ * - `light`: the luminous hue — glows, glyphs, light streaks, dots.
+ * - `soft`:  a lighter tone of the same hue for text/accents on dark
+ *            backgrounds (≥ 7:1 contrast).
+ * - `deep`:  the dark, saturated base of the light tunnel's walls.
  */
 
 export type ChakraId = "root" | "sacral" | "solar" | "heart" | "throat";
@@ -42,12 +41,12 @@ export interface Chakra {
   place: string;
   /** Inner geometry of the lotus. */
   geometry: ChakraGeometry;
-  /** Luminous hue for glows, glyphs and dots. */
+  /** Luminous hue for glows, glyphs, streaks and dots. */
   light: string;
-  /** Deep hue for text and buttons (AA contrast on `tint`). */
-  ink: string;
-  /** Soft background tint of the section. */
-  tint: string;
+  /** Light tone for text and accents on dark backgrounds. */
+  soft: string;
+  /** Dark saturated base color of the light tunnel. */
+  deep: string;
   /** One-line Italian intention for the section. */
   intention: string;
 }
@@ -65,8 +64,8 @@ export const CHAKRAS: readonly Chakra[] = [
     place: "Base della colonna",
     geometry: "square",
     light: "#e0433a",
-    ink: "#b3261e",
-    tint: "#fdeceb",
+    soft: "#f0928c",
+    deep: "#2c0709",
     intention: "Radici, presenza, un luogo sicuro dove iniziare.",
   },
   {
@@ -81,8 +80,8 @@ export const CHAKRAS: readonly Chakra[] = [
     place: "Basso ventre",
     geometry: "crescent",
     light: "#f2762e",
-    ink: "#a94a12",
-    tint: "#fef0e6",
+    soft: "#f8ae82",
+    deep: "#2e1204",
     intention: "Cura del corpo e dei sensi, con dolcezza.",
   },
   {
@@ -97,8 +96,8 @@ export const CHAKRAS: readonly Chakra[] = [
     place: "Plesso solare",
     geometry: "triangle",
     light: "#f2c230",
-    ink: "#806207",
-    tint: "#fdf8e4",
+    soft: "#f8dc85",
+    deep: "#2a1f03",
     intention: "Crescita personale e professionale, passo dopo passo.",
   },
   {
@@ -113,8 +112,8 @@ export const CHAKRAS: readonly Chakra[] = [
     place: "Centro del petto",
     geometry: "hexagram",
     light: "#3dbb73",
-    ink: "#1b7340",
-    tint: "#e8f7ee",
+    soft: "#8fdcae",
+    deep: "#052516",
     intention: "Imparare insieme, condividere, connettersi.",
   },
   {
@@ -129,8 +128,8 @@ export const CHAKRAS: readonly Chakra[] = [
     place: "Gola",
     geometry: "circle",
     light: "#3a9be0",
-    ink: "#1d6aa5",
-    tint: "#e7f2fc",
+    soft: "#8cc6f0",
+    deep: "#041a31",
     intention: "Parlarsi, incontrarsi, prenotare il tuo momento.",
   },
 ] as const;
@@ -142,8 +141,8 @@ export const CHAKRA_BY_SECTION: Record<string, Chakra> = Object.fromEntries(
 /** CSS custom properties a chakra-themed element exposes to its children. */
 export function chakraVars(chakra: Chakra): React.CSSProperties {
   return {
-    ["--accent" as string]: chakra.ink,
+    ["--accent" as string]: chakra.soft,
     ["--glow" as string]: chakra.light,
-    ["--tint" as string]: chakra.tint,
+    ["--deep" as string]: chakra.deep,
   };
 }

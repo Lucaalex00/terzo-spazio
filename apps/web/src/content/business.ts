@@ -31,11 +31,17 @@ export const closures: Closure[] = [
   // Example: { date: "2025-08-15", note: "Ferragosto" },
 ];
 
-/** Optional physical address — fill in for local SEO when available. */
+/** Where Giulia receives clients. Also feeds the LocalBusiness data for SEO. */
 export const address = {
-  street: "",
+  street: "Via Primo Maggio 76/78",
   city: "Canelli",
   region: "AT",
-  postalCode: "",
+  postalCode: "14053",
   country: "IT",
 };
+
+/** One-line address, e.g. "Via Primo Maggio 76/78, 14053 Canelli (AT)". */
+export const addressLine = `${address.street}, ${address.postalCode} ${address.city} (${address.region})`;
+
+/** Google Maps search link for the address. */
+export const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressLine)}`;

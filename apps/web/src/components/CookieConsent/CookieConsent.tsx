@@ -26,9 +26,9 @@ export function CookieConsent() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-2xl rounded-2xl border border-black/10 bg-white/95 p-4 shadow-lg backdrop-blur sm:p-5"
+          className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-2xl rounded-2xl border border-white/15 bg-[#0c0812]/90 p-4 shadow-lg backdrop-blur sm:p-5"
         >
-          <p className="text-sm leading-relaxed text-neutral-700">
+          <p className="text-sm leading-relaxed text-white/80">
             Usiamo solo cookie tecnici necessari. Con il tuo consenso usiamo anche cookie di{" "}
             <strong>statistica</strong> (Google Analytics) per capire come viene usato il sito. Puoi
             cambiare idea in ogni momento dalla{" "}
@@ -41,14 +41,14 @@ export function CookieConsent() {
             <button
               type="button"
               onClick={reject}
-              className="order-2 rounded-full border border-neutral-300 px-5 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 sm:order-1"
+              className="order-2 rounded-full border border-white/20 px-5 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 sm:order-1"
             >
               Solo necessari
             </button>
             <button
               type="button"
               onClick={accept}
-              className="order-1 rounded-full bg-neutral-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 sm:order-2"
+              className="order-1 rounded-full bg-white px-5 py-2 text-sm font-medium text-[#140d17] transition hover:bg-white/85 sm:order-2"
             >
               Accetta tutti
             </button>

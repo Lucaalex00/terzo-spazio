@@ -25,11 +25,21 @@ export const site = {
   /** Towns served — important for local SEO. */
   areasServed: ["Canelli", "Costigliole d'Asti", "Asti"],
 
-  /** Contact bridge. Real bookings happen on Giulia's external app. */
+  /**
+   * Contact bridge. Bookings are arranged with Giulia over WhatsApp; the same
+   * number is shown as the phone contact. An external booking app can be
+   * plugged in later via NEXT_PUBLIC_BOOKING_URL.
+   */
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
   bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL ?? "",
   email: "", // optional: set when available
-  phone: "", // optional: set when available
+
+  /** Legal identity, shown in the footer and the privacy policy. */
+  legal: {
+    name: "Bordino Giulia Maria",
+    form: "Ditta individuale",
+    vatNumber: "01773750052",
+  },
 
   social: {
     instagram: "", // e.g. https://www.instagram.com/...

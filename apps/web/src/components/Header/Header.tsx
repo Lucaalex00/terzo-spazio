@@ -11,6 +11,7 @@ import Link from "next/link";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import { CHAKRAS } from "@/lib/chakras";
 import { site } from "@/lib/site";
+import { Logo } from "@/components/Logo/Logo";
 
 export function Header() {
   const { scrollY } = useScroll();
@@ -27,16 +28,16 @@ export function Header() {
       animate={{ y: hidden ? "-130%" : "0%" }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="mx-auto flex max-w-5xl items-center justify-between rounded-full border border-white/60 bg-white/60 px-5 py-2.5 shadow-lg shadow-black/5 backdrop-blur-xl">
-        <Link href="#benvenuto" className="font-display text-lg text-neutral-900">
-          {site.shortName}
+      <div className="glass-dark mx-auto flex max-w-5xl items-center justify-between rounded-full px-5 py-2.5">
+        <Link href="/" aria-label={`${site.shortName} — torna all'inizio`}>
+          <Logo size={30} />
         </Link>
-        <nav aria-label="Navigazione" className="hidden gap-5 text-sm text-neutral-600 md:flex">
+        <nav aria-label="Navigazione" className="hidden gap-5 text-sm text-white/70 md:flex">
           {CHAKRAS.slice(1).map((c) => (
             <a
               key={c.id}
               href={`#${c.section}`}
-              className="group flex items-center gap-2 transition-colors hover:text-neutral-900"
+              className="group flex items-center gap-2 transition-colors hover:text-white"
             >
               <span
                 aria-hidden
@@ -50,7 +51,7 @@ export function Header() {
         <a
           href="#contatti"
           className="btn-primary px-4 py-1.5 text-xs md:hidden"
-          style={{ ["--accent" as string]: CHAKRAS[4].ink }}
+          style={{ ["--glow" as string]: CHAKRAS[4].light }}
         >
           Prenota
         </a>

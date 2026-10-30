@@ -21,7 +21,36 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   "inspira / espira" rhythm; aurora background with film grain; scroll-filled
   energy channel; cursor light; blur-to-focus reveals; floating glass header.
 
+- Immersive WebGL light tunnel ("chakra journey"): continuous forward flight
+  with random camera tilts, lotus rings carrying each chakra's petal count,
+  light streaks and a chakra sphere at the vanishing point. The active chakra
+  commands a hyperspace jump on every section change; scroll speed, device
+  tilt (phones) and mouse (desktop) steer the flight; adaptive resolution.
+- Chakra "portal": the new seed syllable rushes past on each jump, with a
+  haptic tick on supported phones.
+- Touch-friendly animations: light sweep on titles, cards that light up at
+  the center of the screen, breathing CTA glow with sheen, pulsing WhatsApp
+  button.
+
+- Brand: the Terzo Spazio logo redrawn as vector paths from the original
+  artwork (`src/lib/brand.ts`), used in header, footer and 404; favicon,
+  home-screen icons, web manifest and a 1200×630 share image.
+- Contacts: address (Via Primo Maggio 76/78, Canelli) with Google Maps link and
+  phone; legal identity and VAT number in footer, privacy policy and
+  structured data.
+- Styled 404 page.
+
+### Fixed
+- Structured data pointed to a missing `/og.png`; opening hours now use
+  schema.org day names with separate opens/closes times.
+- Chakra transitions follow real time, so they finish on schedule on slow
+  devices.
+
+### Removed
+- create-next-app template assets and default favicon.
+
 ### Changed
-- Chakra palette split into `light` (glows) and `ink` (text, WCAG AA).
+- Dark immersive theme; chakra palette is now `light` (glows), `soft` (text
+  on dark, ≥ 7:1) and `deep` (tunnel walls).
 - Author credit shown as "Luca" (links to github.com/Lucaalex00).
 - Service cards numbered instead of emoji icons.

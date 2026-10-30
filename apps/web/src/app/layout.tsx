@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Marcellus } from "next/font/google";
 import "./globals.css";
 import { site } from "@/lib/site";
@@ -50,8 +50,28 @@ export const metadata: Metadata = {
     siteName: site.name,
     title: site.name,
     description: site.description,
+    images: [
+      {
+        url: "/brand/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Terzo Spazio di Giulia Bordino — Estetista a Canelli",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.name,
+    description: site.description,
+    images: ["/brand/og.png"],
   },
   robots: { index: true, follow: true },
+};
+
+// Dark, immersive theme: the browser chrome blends into the light tunnel.
+export const viewport: Viewport = {
+  themeColor: "#07060b",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

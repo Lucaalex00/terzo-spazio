@@ -41,6 +41,7 @@ uniform float u_petalsB;
 uniform float u_warp;
 uniform float u_speed;
 uniform float u_scroll;
+uniform float u_dim;
 
 #define TAU 6.28318530718
 
@@ -137,8 +138,10 @@ void main() {
   float vig = smoothstep(1.35, 0.25, length(uv * vec2(0.9, 1.0)));
   col *= mix(0.45, 1.0, vig);
 
-  // Tone map + dither against banding.
+  // Tone map, then dim (keeps the hues, lowers brightness behind text), then
+  // dither against banding.
   col = vec3(1.0) - exp(-col * 1.35);
+  col *= u_dim;
   col += (hash(gl_FragCoord.xy + fract(u_time) * 100.0) - 0.5) / 128.0;
   gl_FragColor = vec4(col, 1.0);
 }

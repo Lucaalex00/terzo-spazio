@@ -18,6 +18,8 @@ interface ChakraGlyphProps {
   chakra: Chakra;
   /** Rendered size in px. */
   size?: number;
+  /** Responsive CSS size instead of `size`, e.g. "min(62vw, 300px)". */
+  sizeCss?: string;
   /** Enable the breathing / rotation loops. */
   alive?: boolean;
   /** Show the bija syllable at the center. */
@@ -92,6 +94,7 @@ function Geometry({ kind, maskId }: { kind: ChakraGeometry; maskId: string }) {
 export function ChakraGlyph({
   chakra,
   size = 160,
+  sizeCss,
   alive = true,
   showBija = true,
   className,
@@ -103,90 +106,105 @@ export function ChakraGlyph({
   const d = petalPath(chakra.petals);
   const backPetal = petalPath(chakra.petals, R_TIP - 16);
 
+  // Three stacked SVG layers sharing one coordinate system. The petal crown
+  // sits on its own HTML layer so its rotation — and the whole glyph's
+  // breathing — run on the compositor (GPU) instead of repainting the SVG
+  // every frame.
+  const layer = {
+    viewBox: "-100 -100 200 200",
+    "aria-hidden": true,
+    className: "absolute inset-0 h-full w-full overflow-visible",
+    style: { color: chakra.light },
+  } as const;
+
   return (
-    <svg
-      viewBox="-100 -100 200 200"
-      width={size}
-      height={size}
+    <span
       role="img"
       aria-label={`${chakra.sanskrit}, ${chakra.name}: ${chakra.petals} petali, elemento ${chakra.element}`}
-      className={`${alive ? "chakra-breathe" : ""} ${className ?? ""}`}
-      style={{ color: chakra.light, overflow: "visible" }}
+      className={`relative inline-block shrink-0 ${alive ? "glyph-breathe" : ""} ${className ?? ""}`}
+      style={{ width: sizeCss ?? size, height: sizeCss ?? size }}
     >
-      <defs>
-        <radialGradient id={gradientId} cx="0" cy="0" r="90" gradientUnits="userSpaceOnUse">
-          <stop offset="0.45" stopColor={chakra.light} stopOpacity={0.5} />
-          <stop offset="1" stopColor={chakra.light} stopOpacity={0.08} />
-        </radialGradient>
-        <radialGradient id={haloId} cx="0" cy="0" r="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor={chakra.light} stopOpacity={0.35} />
-          <stop offset="1" stopColor={chakra.light} stopOpacity={0} />
-        </radialGradient>
-      </defs>
+      <svg {...layer}>
+        <defs>
+          <radialGradient id={haloId} cx="0" cy="0" r="100" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor={chakra.light} stopOpacity={0.35} />
+            <stop offset="1" stopColor={chakra.light} stopOpacity={0} />
+          </radialGradient>
+        </defs>
+        <circle r={100} fill={`url(#${haloId})`} />
+      </svg>
 
-      <circle r={100} fill={`url(#${haloId})`} />
+      <span className={`absolute inset-0 ${alive ? "glyph-spin" : ""}`}>
+        <svg {...layer}>
+          <defs>
+            <radialGradient id={gradientId} cx="0" cy="0" r="90" gradientUnits="userSpaceOnUse">
+              <stop offset="0.45" stopColor={chakra.light} stopOpacity={0.5} />
+              <stop offset="1" stopColor={chakra.light} stopOpacity={0.08} />
+            </radialGradient>
+          </defs>
+          {/* Back crown: shorter petals offset by half a step, for a fuller lotus. */}
+          {Array.from({ length: chakra.petals }, (_, i) => (
+            <motion.path
+              key={`back-${i}`}
+              d={backPetal}
+              transform={`rotate(${(360 / chakra.petals) * (i + 0.5)})`}
+              fill={`url(#${gradientId})`}
+              stroke="currentColor"
+              strokeOpacity={0.5}
+              strokeWidth={1}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 0.55 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.6, delay: 0.6, ease: "easeOut" }}
+            />
+          ))}
+          {Array.from({ length: chakra.petals }, (_, i) => (
+            <motion.path
+              key={i}
+              d={d}
+              transform={`rotate(${(360 / chakra.petals) * i})`}
+              fill={`url(#${gradientId})`}
+              stroke="currentColor"
+              strokeWidth={1.4}
+              strokeLinejoin="round"
+              initial={{ pathLength: 0, opacity: 0 }}
+              whileInView={{ pathLength: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.2, delay: 0.15 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+            />
+          ))}
+        </svg>
+      </span>
 
-      <g className={alive ? "chakra-spin" : undefined}>
-        {/* Back crown: shorter petals offset by half a step, for a fuller lotus. */}
-        {Array.from({ length: chakra.petals }, (_, i) => (
-          <motion.path
-            key={`back-${i}`}
-            d={backPetal}
-            transform={`rotate(${(360 / chakra.petals) * (i + 0.5)})`}
-            fill={`url(#${gradientId})`}
-            stroke="currentColor"
-            strokeOpacity={0.5}
-            strokeWidth={1}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 0.55 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.6, delay: 0.6, ease: "easeOut" }}
-          />
-        ))}
-        {Array.from({ length: chakra.petals }, (_, i) => (
-          <motion.path
-            key={i}
-            d={d}
-            transform={`rotate(${(360 / chakra.petals) * i})`}
-            fill={`url(#${gradientId})`}
-            stroke="currentColor"
-            strokeWidth={1.4}
-            strokeLinejoin="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.2, delay: 0.15 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-          />
-        ))}
-      </g>
+      <svg {...layer}>
+        <circle
+          r={R_BASE - 2}
+          fill="#0c0812"
+          fillOpacity={0.6}
+          stroke="currentColor"
+          strokeWidth={1.6}
+        />
+        <Geometry kind={chakra.geometry} maskId={maskId} />
 
-      <circle
-        r={R_BASE - 2}
-        fill="#0c0812"
-        fillOpacity={0.6}
-        stroke="currentColor"
-        strokeWidth={1.6}
-      />
-      <Geometry kind={chakra.geometry} maskId={maskId} />
-
-      {showBija && chakra.geometry !== "square" && (
-        // Soft disc so geometry lines never cross the seed syllable.
-        <circle r={chakra.geometry === "circle" ? 13 : 18} fill="#0c0812" fillOpacity={0.88} />
-      )}
-      {showBija && (
-        <text
-          x={0}
-          y={0}
-          textAnchor="middle"
-          dominantBaseline="central"
-          className="font-display"
-          fontSize={chakra.geometry === "square" ? 15 : chakra.geometry === "circle" ? 10 : 12}
-          letterSpacing={1}
-          fill={chakra.soft}
-        >
-          {chakra.bija}
-        </text>
-      )}
-    </svg>
+        {showBija && chakra.geometry !== "square" && (
+          // Soft disc so geometry lines never cross the seed syllable.
+          <circle r={chakra.geometry === "circle" ? 13 : 18} fill="#0c0812" fillOpacity={0.88} />
+        )}
+        {showBija && (
+          <text
+            x={0}
+            y={0}
+            textAnchor="middle"
+            dominantBaseline="central"
+            className="font-display"
+            fontSize={chakra.geometry === "square" ? 15 : chakra.geometry === "circle" ? 10 : 12}
+            letterSpacing={1}
+            fill={chakra.soft}
+          >
+            {chakra.bija}
+          </text>
+        )}
+      </svg>
+    </span>
   );
 }

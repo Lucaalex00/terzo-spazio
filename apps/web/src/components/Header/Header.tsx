@@ -53,6 +53,7 @@ export function Header() {
           className="btn-primary px-4 py-1.5 text-xs md:hidden"
           style={{ ["--glow" as string]: CHAKRAS[4].light }}
         >
+          <span aria-hidden className="btn-sheen" />
           Prenota
         </a>
       </div>

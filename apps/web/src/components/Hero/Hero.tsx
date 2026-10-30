@@ -71,20 +71,23 @@ function Words({
   delay?: number;
   className?: string;
 }) {
+  // Words unveil one by one; a single light beam crosses the whole line
+  // (one shimmer per line instead of per word keeps fewer loops running).
   return (
-    <span className={className}>
+    <span className={`shimmer ${className ?? ""}`}>
       {text.split(" ").map((word, i) => (
         <motion.span
           key={`${word}-${i}`}
           className="inline-block"
           initial={{ opacity: 0, y: "0.5em", filter: "blur(12px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
           transition={{ duration: 1, delay: delay + i * 0.14, ease: easeOut }}
         >
-          <span className="text-shimmer">{word}</span>
+          {word}
           {" "}
         </motion.span>
       ))}
+      <span aria-hidden className="shimmer-band" data-text={text} />
     </span>
   );
 }
@@ -108,15 +111,26 @@ export function Hero() {
           />
         ))}
         <motion.div
+          className="relative"
           initial={{ opacity: 0, scale: 0.6, filter: "blur(16px)" }}
-          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          // Drop the filter once settled so it doesn't stay on the spinning layer.
+          animate={{
+            opacity: 1,
+            scale: 1,
+            filter: "blur(0px)",
+            transitionEnd: { filter: "none" },
+          }}
           transition={{ duration: 1.8, ease: easeOut }}
         >
-          <ChakraGlyph
-            chakra={root}
-            size={260}
-            className="h-[min(62vw,300px)] w-[min(62vw,300px)] drop-shadow-[0_0_40px_rgba(224,67,58,0.55)]"
+          {/* Static glow (a filter on the spinning lotus would re-render every frame). */}
+          <span
+            aria-hidden
+            className="absolute inset-[-12%] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(224,67,58,0.45) 0%, transparent 62%)",
+            }}
           />
+          <ChakraGlyph chakra={root} sizeCss="min(62vw, 300px)" />
         </motion.div>
 
         <p
@@ -138,7 +152,7 @@ export function Hero() {
         {site.profession} · {site.areasServed.join(" · ")}
       </motion.p>
 
-      <h1 className="drop-glow mt-4 text-balance font-display text-5xl leading-[1.05] sm:text-7xl">
+      <h1 className="mt-4 text-balance font-display text-5xl leading-[1.05] sm:text-7xl">
         <Words text="Terzo Spazio" delay={0.3} />
         <Words text={`di ${site.owner}`} delay={0.65} className="mt-2 block text-3xl sm:text-4xl" />
       </h1>
@@ -159,6 +173,7 @@ export function Hero() {
         transition={{ duration: 0.9, delay: 1.3, ease: easeOut }}
       >
         <a href="#contatti" className="btn-primary">
+          <span aria-hidden className="btn-sheen" />
           Prenota il tuo momento
         </a>
         <a href="#servizi" className="btn-ghost">
@@ -202,7 +217,7 @@ export function Hero() {
         className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.35em] text-white/60 md:flex"
       >
         Scorri e risveglia i chakra
-        <span className="scroll-cue-line block h-10 w-px bg-white/50" />
+        <span className="scroll-cue-line block h-10 w-px bg-white/20" />
       </a>
     </section>
   );

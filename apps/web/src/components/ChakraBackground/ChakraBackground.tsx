@@ -16,7 +16,7 @@
  * Sections opt in by rendering `data-chakra-section="<index>"`.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   AnimatePresence,
   motion,
@@ -27,9 +27,56 @@ import {
 } from "motion/react";
 import { CHAKRAS } from "@/lib/chakras";
 import { ChakraJourney } from "@/components/ChakraJourney/ChakraJourney";
+import { JUMP } from "@/components/ChakraJourney/journeyWorker";
 
 const CHANNEL_GRADIENT_Y = `linear-gradient(to bottom, ${CHAKRAS.map((c) => c.light).join(", ")})`;
 const CHANNEL_GRADIENT_X = `linear-gradient(to right, ${CHAKRAS.map((c) => c.light).join(", ")})`;
+
+const noopSubscribe = () => () => {};
+const supportsScrollTimeline = () =>
+  typeof CSS !== "undefined" && CSS.supports("animation-timeline: scroll()");
+
+/**
+ * The chakra bar's fill, growing with page scroll. Where the browser supports
+ * scroll-driven animations it is pure CSS (compositor, no JS per frame; see
+ * globals.css); otherwise a JS spring drives a clip.
+ */
+function ChannelFill({ axis, className }: { axis: "x" | "y"; className: string }) {
+  const cssDriven = useSyncExternalStore(noopSubscribe, supportsScrollTimeline, () => false);
+  const gradient = axis === "y" ? CHANNEL_GRADIENT_Y : CHANNEL_GRADIENT_X;
+  if (cssDriven) {
+    return (
+      <div aria-hidden className={`${className} overflow-hidden bar-fill-${axis}`}>
+        <div className="h-full w-full" style={{ backgroundImage: gradient }} />
+      </div>
+    );
+  }
+  return <ChannelFillJs axis={axis} className={className} gradient={gradient} />;
+}
+
+function ChannelFillJs({
+  axis,
+  className,
+  gradient,
+}: {
+  axis: "x" | "y";
+  className: string;
+  gradient: string;
+}) {
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 90, damping: 24, mass: 0.4 });
+  // Clip (not scale) so each chakra color stays at its own position.
+  const clip = useTransform(progress, (p) =>
+    axis === "y" ? `inset(0 0 ${(1 - p) * 100}% 0)` : `inset(0 ${(1 - p) * 100}% 0 0)`,
+  );
+  return (
+    <motion.div
+      aria-hidden
+      className={className}
+      style={{ clipPath: clip, backgroundImage: gradient }}
+    />
+  );
+}
 
 interface JourneyState {
   active: number;
@@ -62,8 +109,26 @@ function useChakraJourney(): JourneyState {
       { rootMargin: "-45% 0px -45% 0px" },
     );
 
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
+    // Pause the CSS loops of sections that are off screen (see globals.css):
+    // the browser keeps ticking every running animation each frame, visible
+    // or not, and on phones that adds up. Paused loops resume where they were.
+    const visibility = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          entry.target.toggleAttribute("data-offscreen", !entry.isIntersecting);
+        }
+      },
+      { rootMargin: "120px 0px" },
+    );
+
+    sections.forEach((s) => {
+      observer.observe(s);
+      visibility.observe(s);
+    });
+    return () => {
+      observer.disconnect();
+      visibility.disconnect();
+    };
   }, []);
 
   return state;
@@ -74,40 +139,42 @@ function Portal({ active, jumps }: JourneyState) {
   const chakra = CHAKRAS[active] ?? CHAKRAS[0];
   if (reduce || jumps === 0) return null;
 
+  // In step with the tunnel's jump (JUMP): a veil over the WHOLE site (above
+  // header, bars and buttons) darkens it by 80% and blurs it in 0.5 s, the
+  // chakra text appears on top and holds still and sharp for 1 s, then the
+  // veil lifts in the last 0.5 s. It never blocks scrolling or taps.
+  // Exact timing comes from CSS keyframes (globals.css: portal-veil,
+  // portal-text); remounting on each jump (key) restarts them.
+  const duration = { animationDuration: `${JUMP.total}s` };
+
   return (
-    <AnimatePresence>
-      <motion.div
-        key={jumps}
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-30 grid place-items-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ duration: 1.6, times: [0, 0.35, 1], ease: "easeOut" }}
-      >
-        <motion.div
-          className="text-center"
-          initial={{ scale: 0.4, filter: "blur(14px)" }}
-          animate={{
-            scale: [0.4, 1, 2.2],
-            filter: ["blur(14px)", "blur(0px)", "blur(18px)"],
+    <div
+      key={jumps}
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[9999] grid place-items-center px-6"
+    >
+      <div
+        className="portal-veil absolute inset-0 bg-[#07060b]/80 backdrop-blur-lg"
+        style={duration}
+      />
+      <div className="portal-text relative text-center" style={duration}>
+        <span
+          className="block font-display text-[24vw] leading-none tracking-[0.12em] md:text-[10vw]"
+          style={{
+            color: "#fff",
+            textShadow: `0 0 2px rgba(0,0,0,0.45), 0 0 28px ${chakra.light}, 0 0 80px ${chakra.light}`,
           }}
-          transition={{ duration: 1.6, times: [0, 0.4, 1], ease: [0.22, 1, 0.36, 1] }}
         >
-          <span
-            className="block font-display text-[26vw] leading-none tracking-[0.12em] md:text-[11vw]"
-            style={{
-              color: "#fff",
-              textShadow: `0 0 2px rgba(0,0,0,0.45), 0 0 28px ${chakra.light}, 0 0 80px ${chakra.light}`,
-            }}
-          >
-            {chakra.bija}
-          </span>
-          <span className="mt-3 block text-[11px] uppercase tracking-[0.6em] text-white/80">
-            {chakra.sanskrit}
-          </span>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          {chakra.bija}
+        </span>
+        <span className="mt-4 block font-display text-2xl text-white md:text-3xl">
+          {chakra.label}
+        </span>
+        <span className="mt-2 block text-xs uppercase tracking-[0.5em] text-white/75">
+          {chakra.sanskrit}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -115,13 +182,6 @@ export function ChakraBackground() {
   const journey = useChakraJourney();
   const { active } = journey;
   const current = CHAKRAS[active] ?? CHAKRAS[0];
-
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 90, damping: 24, mass: 0.4 });
-  // Reveal the channel with a clip (not a scale) so each chakra color stays at
-  // its own position along the line.
-  const clipY = useTransform(progress, (p) => `inset(0 0 ${(1 - p) * 100}% 0)`);
-  const clipX = useTransform(progress, (p) => `inset(0 ${(1 - p) * 100}% 0 0)`);
 
   const scrollTo = (section: string) => {
     document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -138,10 +198,9 @@ export function ChakraBackground() {
         className="fixed right-6 top-1/2 z-40 hidden h-[56vh] -translate-y-1/2 md:block"
       >
         <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/15" />
-        <motion.div
-          aria-hidden
+        <ChannelFill
+          axis="y"
           className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 rounded-full"
-          style={{ clipPath: clipY, backgroundImage: CHANNEL_GRADIENT_Y }}
         />
         <ol className="relative flex h-full flex-col justify-between">
           {CHAKRAS.map((chakra, index) => {
@@ -174,33 +233,34 @@ export function ChakraBackground() {
                     style={{ width: 11, height: 11 }}
                   />
                 </button>
-
-                <AnimatePresence>
-                  {isActive && (
-                    <motion.span
-                      key={chakra.id}
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 8 }}
-                      transition={{ duration: 0.35 }}
-                      className="pointer-events-none absolute right-full mr-4 whitespace-nowrap text-right"
-                    >
-                      <span
-                        className="block font-display text-sm tracking-[0.3em]"
-                        style={{ color: chakra.soft }}
-                      >
-                        {chakra.bija}
-                      </span>
-                      <span className="block text-[10px] uppercase tracking-[0.2em] text-white/60">
-                        {chakra.sanskrit}
-                      </span>
-                    </motion.span>
-                  )}
-                </AnimatePresence>
               </li>
             );
           })}
         </ol>
+
+        {/* Active chakra name, set vertically along the bar so it reads as
+            part of it. Centered on the active dot (dots are 28px tall and
+            spread evenly along the bar). */}
+        <AnimatePresence>
+          <motion.p
+            key={current.id}
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.45 }}
+            className="text-glow pointer-events-none absolute right-full mr-5 flex -translate-y-1/2 items-center gap-3 whitespace-nowrap [writing-mode:vertical-rl]"
+            style={{ top: `calc(14px + (100% - 28px) * ${active / (CHAKRAS.length - 1)})` }}
+          >
+            <span className="font-display text-[17px] text-white">{current.label}</span>
+            <span
+              className="text-[11px] uppercase tracking-[0.25em]"
+              style={{ color: current.soft }}
+            >
+              {current.sanskrit} · {current.bija}
+            </span>
+          </motion.p>
+        </AnimatePresence>
       </nav>
 
       {/* Energy channel — mobile: pill at the bottom */}
@@ -210,10 +270,9 @@ export function ChakraBackground() {
       >
         <div className="relative flex items-center gap-3">
           <div className="absolute left-1 right-1 top-1/2 h-px -translate-y-1/2 bg-white/15" />
-          <motion.div
-            aria-hidden
+          <ChannelFill
+            axis="x"
             className="absolute left-1 right-1 top-1/2 h-[2px] -translate-y-1/2 rounded-full"
-            style={{ clipPath: clipX, backgroundImage: CHANNEL_GRADIENT_X }}
           />
           {CHAKRAS.map((chakra, index) => {
             const lit = index <= active;

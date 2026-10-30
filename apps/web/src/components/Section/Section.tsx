@@ -10,15 +10,16 @@
  * - Header: the chakra lotus, a Sanskrit eyebrow that "focuses" its letters
  *   into place, a title crossed by a beam of light, and the chakra's
  *   attributes popping in one by one — all scroll-driven, no hover needed.
- * - A giant seed syllable floats behind the content with a gentle parallax.
+ * - A giant seed syllable floats behind the content with a gentle parallax
+ *   (CSS scroll-driven animation; static where unsupported).
  */
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
 import type { Chakra } from "@/lib/chakras";
 import { CHAKRAS, chakraVars } from "@/lib/chakras";
 import { ChakraGlyph } from "@/components/ChakraGlyph/ChakraGlyph";
 import { Reveal } from "@/components/Reveal/Reveal";
+import { Shimmer } from "@/components/Shimmer/Shimmer";
 
 interface SectionProps {
   chakra: Chakra;
@@ -29,29 +30,24 @@ const easeOut = [0.22, 1, 0.36, 1] as const;
 
 export function Section({ chakra, children }: SectionProps) {
   const index = CHAKRAS.findIndex((c) => c.id === chakra.id);
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const bijaY = useTransform(scrollYProgress, [0, 1], ["25%", "-25%"]);
-  const bijaScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.85, 1, 1.15]);
-
   const attributes = [`${chakra.petals} petali`, chakra.element, chakra.place];
 
   return (
     <section
-      ref={ref}
       id={chakra.section}
       data-chakra-section={index}
       style={chakraVars(chakra)}
-      className="relative flex min-h-[100svh] scroll-mt-16 flex-col justify-center overflow-hidden px-5 py-28 sm:px-8"
+      className="chakra-section relative flex min-h-[100svh] scroll-mt-16 flex-col justify-center overflow-hidden px-5 py-28 sm:px-8"
     >
-      {/* Seed syllable watermark */}
-      <motion.span
+      {/* Seed syllable watermark; its parallax is a CSS scroll-driven
+          animation (globals.css), run by the browser off the main thread. */}
+      <span
         aria-hidden
-        style={{ y: bijaY, scale: bijaScale, color: chakra.light }}
-        className="pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 select-none font-display text-[40vw] leading-none opacity-[0.08] md:text-[22vw]"
+        style={{ color: chakra.light }}
+        className="watermark-drift pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 select-none font-display text-[40vw] leading-none opacity-[0.08] md:text-[22vw]"
       >
         {chakra.bija}
-      </motion.span>
+      </span>
 
       <div className="relative mx-auto w-full max-w-4xl">
         <header className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
@@ -70,8 +66,8 @@ export function Section({ chakra, children }: SectionProps) {
               {chakra.sanskrit} · {chakra.bija}
             </motion.p>
             <Reveal index={1}>
-              <h2 className="drop-glow mt-2 text-balance font-display text-4xl sm:text-5xl">
-                <span className="text-shimmer">{chakra.label}</span>
+              <h2 className="mt-2 text-balance font-display text-4xl sm:text-5xl">
+                <Shimmer text={chakra.label} />
               </h2>
               <p className="text-glow mt-3 max-w-prose text-pretty text-white/80">
                 {chakra.intention}

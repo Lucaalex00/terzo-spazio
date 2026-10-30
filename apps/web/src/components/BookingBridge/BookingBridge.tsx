@@ -71,6 +71,7 @@ export function BookingBridge() {
 
         {href ? (
           <a href={href} target="_blank" rel="noopener noreferrer" className="btn-primary w-full">
+            <span aria-hidden className="btn-sheen" />
             {external ? "Vai a prenotare" : "Scrivi su WhatsApp"}
           </a>
         ) : (

@@ -40,6 +40,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   structured data.
 - Styled 404 page.
 
+- Chakra portal: on every jump a full-site veil darkens (80%) and blurs the
+  page for 2 s (0.5 s in, 1 s hold, 0.5 s out) while the seed syllable,
+  section name and Sanskrit name stay sharp on top.
+- Desktop: the active chakra's name is set vertically along the chakra bar.
+
+### Performance
+- WebGL tunnel moved to a Web Worker (OffscreenCanvas): rendering no longer
+  occupies the main thread.
+- Lotus, logo, title-shimmer, button-glow and scroll-cue loops reworked as
+  compositor-only animations (same look); loops of off-screen sections pause.
+- Watermark parallax and chakra-bar fill use CSS scroll-driven animations
+  (JS fallback for the bar where unsupported).
+- Lingering `blur(0px)` filters removed after reveals.
+- Measured on a real GPU (Chrome, Radeon 680M): desktop idle 56 → 60 fps with
+  0 janky frames, scroll 40 → 50 fps; phone (CPU 2x slower) idle 58 fps,
+  scroll 46 fps.
+
 ### Fixed
 - Structured data pointed to a missing `/og.png`; opening hours now use
   schema.org day names with separate opens/closes times.

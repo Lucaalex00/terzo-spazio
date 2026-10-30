@@ -4,7 +4,8 @@
  * own lettering.
  *
  * `alive` lets the sun breathe on the site's 6-second rhythm and the rays
- * glow softly; loops are CSS, so reduced motion freezes them.
+ * glow softly. Rays, sun and face are three stacked SVG layers so those loops
+ * animate whole layers on the compositor instead of repainting the SVG.
  */
 
 import {
@@ -25,34 +26,37 @@ interface LogoProps {
   className?: string;
 }
 
+const LAYER = "absolute inset-0 h-full w-full overflow-visible";
+
 export function LogoMark({ size = 32, alive = true }: { size?: number; alive?: boolean }) {
   const [, , w, h] = MARK_VIEWBOX.split(" ").map(Number);
   return (
-    <svg
-      viewBox={MARK_VIEWBOX}
-      height={size}
-      width={(size * w) / h}
+    <span
       aria-hidden
-      className="shrink-0 overflow-visible"
+      className="relative inline-block shrink-0"
+      style={{ width: (size * w) / h, height: size }}
     >
-      <path
-        d={RAYS_PATH}
-        stroke={BRAND_COLORS.sun}
-        strokeWidth={RAYS_STROKE_WIDTH}
-        fill="none"
-        className={alive ? "logo-rays" : undefined}
-      />
-      <circle
-        cx={SUN.cx}
-        cy={SUN.cy}
-        r={SUN.r}
-        fill={BRAND_COLORS.sun}
-        className={alive ? "logo-sun" : undefined}
-      />
-      {FACE_PATHS.map((d, i) => (
-        <path key={i} d={d} fill={BRAND_COLORS.sageOnDark} />
-      ))}
-    </svg>
+      <span className={`absolute inset-0 ${alive ? "logo-rays" : ""}`}>
+        <svg viewBox={MARK_VIEWBOX} className={LAYER}>
+          <path
+            d={RAYS_PATH}
+            stroke={BRAND_COLORS.sun}
+            strokeWidth={RAYS_STROKE_WIDTH}
+            fill="none"
+          />
+        </svg>
+      </span>
+      <span className={`absolute inset-0 ${alive ? "logo-sun" : ""}`}>
+        <svg viewBox={MARK_VIEWBOX} className={LAYER}>
+          <circle cx={SUN.cx} cy={SUN.cy} r={SUN.r} fill={BRAND_COLORS.sun} />
+        </svg>
+      </span>
+      <svg viewBox={MARK_VIEWBOX} className={LAYER}>
+        {FACE_PATHS.map((d, i) => (
+          <path key={i} d={d} fill={BRAND_COLORS.sageOnDark} />
+        ))}
+      </svg>
+    </span>
   );
 }
 

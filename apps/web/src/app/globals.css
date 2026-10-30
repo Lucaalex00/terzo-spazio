@@ -58,28 +58,35 @@ body {
       0 0 2px rgb(0 0 0 / 0.45);
   }
 
-  /* A beam of chakra light sweeps across the text every few seconds. */
-  .text-shimmer {
-    background-image: linear-gradient(
-      110deg,
-      #fff 0%,
-      #fff 40%,
-      var(--accent, #fff) 50%,
-      #fff 60%,
-      #fff 100%
-    );
-    background-size: 250% 100%;
-    background-position: 100% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: text-shimmer 6s var(--ease-soft) infinite;
+  /* A beam of chakra light sweeps across the text every few seconds (see
+     Shimmer). The band and its tinted copy move in opposite directions, so the
+     copy stays on the letters; both are compositor-only transform animations. */
+  .shimmer {
+    position: relative;
+    display: inline-block;
+    color: #fff;
+    text-shadow:
+      0 2px 18px rgb(0 0 0 / 0.55),
+      0 0 2px rgb(0 0 0 / 0.4);
   }
 
-  /* Put this on the PARENT of .text-shimmer: a filter on the clipped element
-     itself can hide the gradient in Chromium. */
-  .drop-glow {
-    filter: drop-shadow(0 2px 18px rgb(0 0 0 / 0.55));
+  .shimmer-band {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(110deg, transparent 25%, #000 50%, transparent 75%);
+    mask-image: linear-gradient(110deg, transparent 25%, #000 50%, transparent 75%);
+    animation: shimmer-band 6s var(--ease-soft) infinite;
+    will-change: translate;
+  }
+
+  .shimmer-band::after {
+    content: attr(data-text);
+    display: block;
+    color: var(--accent, #fff);
+    text-shadow: none;
+    animation: shimmer-copy 6s var(--ease-soft) infinite;
+    will-change: translate;
   }
 
   .glass-dark {
@@ -144,7 +151,6 @@ body {
   .btn-ghost {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -159,18 +165,41 @@ body {
       filter 0.35s var(--ease-soft);
   }
 
-  /* Primary CTA: chakra light, a breathing glow and a periodic sheen. */
+  /* Primary CTA: chakra light, a breathing glow and a periodic sheen.
+     The glow is a larger shadow on its own layer whose opacity breathes, and
+     the sheen slides inside a clipped child (.btn-sheen): both run on the
+     compositor instead of repainting the shadow every frame. */
   .btn-primary {
     color: #140d17;
     background: var(--glow, #f4efe9);
-    animation: glow-breathe 6s ease-in-out infinite;
+    box-shadow: 0 10px 30px -10px var(--glow, rgb(255 255 255 / 0.4));
   }
 
-  .btn-primary::after {
+  .btn-primary::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
+    border-radius: inherit;
+    box-shadow: 0 14px 44px -6px var(--glow, rgb(255 255 255 / 0.6));
+    opacity: 0;
+    animation: glow-breathe 6s ease-in-out infinite;
+    will-change: opacity;
+  }
+
+  .btn-sheen {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .btn-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
       100deg,
       transparent 30%,
@@ -179,6 +208,7 @@ body {
     );
     translate: -120% 0;
     animation: btn-sheen 4.5s var(--ease-soft) infinite;
+    will-change: translate;
   }
 
   .btn-primary:hover {
@@ -247,23 +277,33 @@ body {
 
 /* ------------------------------------------------------------ keyframes */
 
-@keyframes text-shimmer {
+@keyframes shimmer-band {
   0%,
   55% {
-    background-position: 100% 0;
+    translate: -100% 0;
   }
   100% {
-    background-position: 0% 0;
+    translate: 100% 0;
+  }
+}
+
+@keyframes shimmer-copy {
+  0%,
+  55% {
+    translate: 100% 0;
+  }
+  100% {
+    translate: -100% 0;
   }
 }
 
 @keyframes glow-breathe {
   0%,
   100% {
-    box-shadow: 0 10px 30px -10px var(--glow, rgb(255 255 255 / 0.4));
+    opacity: 0;
   }
   50% {
-    box-shadow: 0 14px 44px -6px var(--glow, rgb(255 255 255 / 0.6));
+    opacity: 1;
   }
 }
 
@@ -310,9 +350,16 @@ body {
   }
 }
 
-.chakra-breathe {
-  transform-origin: center;
+/* Lotus glyph layers (ChakraGlyph): whole-glyph breathing and petal-crown
+   rotation run as compositor animations on HTML layers. */
+.glyph-breathe {
   animation: chakra-breathe 6s ease-in-out infinite;
+  will-change: scale;
+}
+
+.glyph-spin {
+  animation: chakra-spin 120s linear infinite;
+  will-change: rotate;
 }
 
 @keyframes chakra-spin {
@@ -321,11 +368,13 @@ body {
   }
 }
 
-/* Logo: the sun breathes with the site's rhythm, the rays glow softly. */
+/* Logo (LogoMark layers): the sun breathes with the site's rhythm around its
+   own center (48.5% / 42.1% of the mark), the rays glow softly. Both run on
+   HTML layers so they never repaint the SVG. */
 .logo-sun {
-  transform-box: fill-box;
-  transform-origin: center;
+  transform-origin: 48.5% 42.1%;
   animation: chakra-breathe 6s ease-in-out infinite;
+  will-change: scale;
 }
 
 @keyframes logo-rays {
@@ -340,12 +389,7 @@ body {
 
 .logo-rays {
   animation: logo-rays 6s ease-in-out infinite;
-}
-
-.chakra-spin {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: chakra-spin 120s linear infinite;
+  will-change: opacity;
 }
 
 @keyframes chakra-ripple {
@@ -437,26 +481,168 @@ body {
   }
 }
 
+/* A drop of light runs down the scroll cue line (translate only). */
 @keyframes scroll-cue {
-  0% {
-    scale: 1 0;
-    transform-origin: top;
+  from {
+    translate: 0 -100%;
   }
-  50% {
-    scale: 1 1;
-    transform-origin: top;
-  }
-  51% {
-    transform-origin: bottom;
-  }
-  100% {
-    scale: 1 0;
-    transform-origin: bottom;
+  to {
+    translate: 0 100%;
   }
 }
 
 .scroll-cue-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.scroll-cue-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(255 255 255 / 0.85);
   animation: scroll-cue 2.4s var(--ease-soft) infinite;
+  will-change: translate;
+}
+
+/* ------------------------------------------------- chakra portal */
+/* Timeline of a 2 s jump (duration set inline from JUMP): veil darkens in
+   0.5 s, holds 1 s, lifts in 0.5 s; the text appears as it gets dark, holds
+   still and sharp, then fades as the light returns. */
+
+@keyframes portal-veil {
+  0% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes portal-text {
+  0%,
+  20% {
+    opacity: 0;
+    scale: 0.92;
+  }
+  30%,
+  75% {
+    opacity: 1;
+    scale: 1;
+  }
+  95%,
+  100% {
+    opacity: 0;
+    scale: 1.06;
+  }
+}
+
+.portal-veil {
+  opacity: 0;
+  animation: portal-veil 2s ease-in-out both;
+}
+
+.portal-text {
+  opacity: 0;
+  animation: portal-text 2s ease-in-out both;
+}
+
+/* ------------------------------------------- scroll-driven (CSS only) */
+/* Run by the browser on the compositor, with no JavaScript per frame.
+   Where unsupported, the watermark stays still and the chakra bar falls back
+   to its JS fill (see ChakraBackground). */
+
+@keyframes watermark-drift {
+  from {
+    transform: translateY(25%) scale(0.85);
+  }
+  50% {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(-25%) scale(1.15);
+  }
+}
+
+/* The bar reveals its gradient without moving it: the clipping wrapper
+   slides in while the gradient inside slides back by the same amount. */
+@keyframes bar-reveal-y {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bar-counter-y {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bar-reveal-x {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bar-counter-x {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .chakra-section {
+    view-timeline-name: --chakra-section;
+  }
+
+  .watermark-drift {
+    animation: watermark-drift linear both;
+    animation-timeline: --chakra-section;
+    animation-range: cover 0% cover 100%;
+  }
+
+  .bar-fill-y {
+    animation: bar-reveal-y linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  .bar-fill-y > * {
+    animation: bar-counter-y linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  .bar-fill-x {
+    animation: bar-reveal-x linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  .bar-fill-x > * {
+    animation: bar-counter-x linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+/* Sections out of view pause their loops (attribute set by ChakraBackground). */
+[data-offscreen] *,
+[data-offscreen] *::before,
+[data-offscreen] *::after {
+  animation-play-state: paused !important;
 }
 
 /* ------------------------------------------------------ reduced motion */

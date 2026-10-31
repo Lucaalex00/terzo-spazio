@@ -553,20 +553,8 @@ body {
 
 /* ------------------------------------------- scroll-driven (CSS only) */
 /* Run by the browser on the compositor, with no JavaScript per frame.
-   Where unsupported, the watermark stays still and the chakra bar falls back
-   to its JS fill (see ChakraBackground). */
-
-@keyframes watermark-drift {
-  from {
-    transform: translateY(25%) scale(0.85);
-  }
-  50% {
-    transform: translateY(0) scale(1);
-  }
-  to {
-    transform: translateY(-25%) scale(1.15);
-  }
-}
+   Where unsupported, the chakra bar falls back to its JS fill (see
+   ChakraBackground). */
 
 /* The bar reveals its gradient without moving it: the clipping wrapper
    slides in while the gradient inside slides back by the same amount. */
@@ -606,17 +594,7 @@ body {
   }
 }
 
-@supports (animation-timeline: view()) {
-  .chakra-section {
-    view-timeline-name: --chakra-section;
-  }
-
-  .watermark-drift {
-    animation: watermark-drift linear both;
-    animation-timeline: --chakra-section;
-    animation-range: cover 0% cover 100%;
-  }
-
+@supports (animation-timeline: scroll()) {
   .bar-fill-y {
     animation: bar-reveal-y linear both;
     animation-timeline: scroll(root block);

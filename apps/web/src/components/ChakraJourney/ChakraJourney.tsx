@@ -14,7 +14,7 @@
  * and light returns in the new chakra's color — while the flight never stops.
  *
  * Performance: rendering runs in a Web Worker on an OffscreenCanvas
- * (journeyWorker.ts), so it never occupies the main thread; this component
+ * (public/journey-worker.js), so it never occupies the main thread; this component
  * only forwards state changes. Resolution adapts to the measured frame time.
  * With "reduce motion" only a gentle color fade remains. Without
  * OffscreenCanvas or WebGL a static CSS gradient takes over.
@@ -22,7 +22,8 @@
 
 import { useEffect, useRef } from "react";
 import { CHAKRAS } from "@/lib/chakras";
-import { journeyWorkerSource, type JourneyPalette, type JourneyState } from "./journeyWorker";
+import { JOURNEY_FRAGMENT, JOURNEY_VERTEX } from "./journeyShader";
+import { JOURNEY_WORKER_URL, JUMP, type JourneyPalette, type JourneyState } from "./journeyWorker";
 
 function hexToRgb(hex: string): [number, number, number] {
   return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255) as [number, number, number];
@@ -69,8 +70,7 @@ export function ChakraJourney({ active }: { active: number }) {
     }
     host.replaceChildren(canvas);
 
-    const url = URL.createObjectURL(new Blob([journeyWorkerSource()], { type: "text/javascript" }));
-    const worker = new Worker(url);
+    const worker = new Worker(JOURNEY_WORKER_URL);
     workerRef.current = worker;
     worker.onmessage = (e) => {
       if (e.data?.type === "fail") showFallback();
@@ -98,9 +98,17 @@ export function ChakraJourney({ active }: { active: number }) {
       steerY: 0,
       steerRoll: 0,
     };
-    worker.postMessage({ type: "init", canvas: offscreen, palettes: PALETTES, state: initial }, [
-      offscreen,
-    ]);
+    worker.postMessage(
+      {
+        type: "init",
+        canvas: offscreen,
+        palettes: PALETTES,
+        state: initial,
+        shaders: { vert: JOURNEY_VERTEX, frag: JOURNEY_FRAGMENT },
+        jump: JUMP,
+      },
+      [offscreen],
+    );
 
     const onScroll = () => post(scrollState());
     const resizeObserver = new ResizeObserver(() =>
@@ -145,7 +153,6 @@ export function ChakraJourney({ active }: { active: number }) {
       resizeObserver.disconnect();
       worker.terminate();
       workerRef.current = null;
-      URL.revokeObjectURL(url);
       host.replaceChildren();
     };
   }, []);

@@ -92,19 +92,37 @@ function useChakraJourney(): JourneyState {
     const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-chakra-section]"));
     if (sections.length === 0) return;
 
-    // Whichever section crosses a thin band in the middle of the viewport is
-    // the active chakra — deterministic even for very tall sections.
+    // The active chakra is the section under the middle of the viewport. We
+    // track every section inside a thin middle band and, on any change,
+    // re-pick the one containing the center line. (Reacting only to sections
+    // *entering* the band missed the case where a section never left it: scroll
+    // a little into the next section, then back up, and the previous one —
+    // still in the band — was never re-activated.)
+    const inBand = new Set<Element>();
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const index = Number(entry.target.getAttribute("data-chakra-section"));
-          if (index === lastRef.current) continue;
-          lastRef.current = index;
-          // A soft haptic tick when crossing into a new chakra (Android).
-          if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(12);
-          setState((prev) => ({ active: index, jumps: prev.jumps + 1 }));
+          if (entry.isIntersecting) inBand.add(entry.target);
+          else inBand.delete(entry.target);
         }
+        const center = window.innerHeight / 2;
+        let picked: Element | undefined;
+        for (const el of inBand) {
+          const r = el.getBoundingClientRect();
+          if (r.top <= center && r.bottom > center) {
+            picked = el;
+            break;
+          }
+        }
+        picked ??= inBand.values().next().value;
+        if (!picked) return; // e.g. the footer is in the middle: keep the last chakra
+
+        const index = Number(picked.getAttribute("data-chakra-section"));
+        if (index === lastRef.current) return;
+        lastRef.current = index;
+        // A soft haptic tick when crossing into a new chakra (Android).
+        if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(12);
+        setState((prev) => ({ active: index, jumps: prev.jumps + 1 }));
       },
       { rootMargin: "-45% 0px -45% 0px" },
     );
@@ -238,9 +256,10 @@ export function ChakraBackground() {
           })}
         </ol>
 
-        {/* Active chakra name, set vertically along the bar so it reads as
-            part of it. Centered on the active dot (dots are 28px tall and
-            spread evenly along the bar). */}
+        {/* Active chakra's seed syllable (LAM, VAM…), letters stacked upright
+            along the bar like a vertical sign — the same code the mobile pill
+            and the portal use. Centered on the active dot (dots are 28px tall
+            and spread evenly along the bar). */}
         <AnimatePresence>
           <motion.p
             key={current.id}
@@ -249,16 +268,13 @@ export function ChakraBackground() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.45 }}
-            className="text-glow pointer-events-none absolute right-full mr-5 flex -translate-y-1/2 items-center gap-3 whitespace-nowrap [writing-mode:vertical-rl]"
-            style={{ top: `calc(14px + (100% - 28px) * ${active / (CHAKRAS.length - 1)})` }}
+            className="text-glow pointer-events-none absolute right-full mr-4 -translate-y-1/2 whitespace-nowrap font-display text-xl leading-none tracking-[0.35em] [text-orientation:upright] [writing-mode:vertical-rl]"
+            style={{
+              top: `calc(14px + (100% - 28px) * ${active / (CHAKRAS.length - 1)})`,
+              color: current.soft,
+            }}
           >
-            <span className="font-display text-[17px] text-white">{current.label}</span>
-            <span
-              className="text-[11px] uppercase tracking-[0.25em]"
-              style={{ color: current.soft }}
-            >
-              {current.sanskrit} · {current.bija}
-            </span>
+            {current.bija}
           </motion.p>
         </AnimatePresence>
       </nav>

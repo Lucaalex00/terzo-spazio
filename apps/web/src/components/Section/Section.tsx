@@ -10,8 +10,6 @@
  * - Header: the chakra lotus, a Sanskrit eyebrow that "focuses" its letters
  *   into place, a title crossed by a beam of light, and the chakra's
  *   attributes popping in one by one — all scroll-driven, no hover needed.
- * - A giant seed syllable floats behind the content with a gentle parallax
- *   (CSS scroll-driven animation; static where unsupported).
  */
 
 import { motion } from "motion/react";
@@ -37,18 +35,8 @@ export function Section({ chakra, children }: SectionProps) {
       id={chakra.section}
       data-chakra-section={index}
       style={chakraVars(chakra)}
-      className="chakra-section relative flex min-h-[100svh] scroll-mt-16 flex-col justify-center overflow-hidden px-5 py-28 sm:px-8"
+      className="relative flex min-h-[100svh] scroll-mt-16 flex-col justify-center overflow-hidden px-5 py-28 sm:px-8"
     >
-      {/* Seed syllable watermark; its parallax is a CSS scroll-driven
-          animation (globals.css), run by the browser off the main thread. */}
-      <span
-        aria-hidden
-        style={{ color: chakra.light }}
-        className="watermark-drift pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 select-none font-display text-[40vw] leading-none opacity-[0.08] md:text-[22vw]"
-      >
-        {chakra.bija}
-      </span>
-
       <div className="relative mx-auto w-full max-w-4xl">
         <header className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
           <Reveal className="shrink-0">

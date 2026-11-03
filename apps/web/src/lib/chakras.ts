@@ -1,17 +1,25 @@
 /**
  * The five-chakra design system.
  *
- * The site is built as a vertical scroll of five sections. Each section is
- * tied to one chakra, which gives it its dot on the rail, its accent color,
- * its background tint and its mood. As a section enters the viewport its dot
- * "lights up" and the ambient background drifts toward that chakra's color.
+ * The site is a journey through five chakras (root → throat). Each section is
+ * tied to one chakra, which gives it its lotus glyph, its dot on the energy
+ * channel, its seed syllable and — above all — the color of the light tunnel
+ * the visitor travels through while that section is on screen.
  *
- * We deliberately use five chakras (not seven) to match the project's visual
- * concept of five dots. Colors are chosen to be legible and WCAG-friendly as
- * accents on a soft light background.
+ * The symbolism follows the traditional iconography: petal count, bija
+ * (seed) mantra, element and inner geometry of each chakra lotus.
+ *
+ * Three tones per chakra (the site uses a dark, immersive theme):
+ * - `light`: the luminous hue — glows, glyphs, light streaks, dots.
+ * - `soft`:  a lighter tone of the same hue for text/accents on dark
+ *            backgrounds (≥ 7:1 contrast).
+ * - `deep`:  the dark, saturated base of the light tunnel's walls.
  */
 
 export type ChakraId = "root" | "sacral" | "solar" | "heart" | "throat";
+
+/** Inner geometry drawn at the center of the lotus. */
+export type ChakraGeometry = "square" | "crescent" | "triangle" | "hexagram" | "circle";
 
 export interface Chakra {
   id: ChakraId;
@@ -19,13 +27,27 @@ export interface Chakra {
   section: string;
   /** Short Italian label shown in the UI. */
   label: string;
-  /** Sanskrit-ish name, used as a subtle subtitle. */
+  /** Sanskrit name. */
   sanskrit: string;
-  /** Primary accent color (hex). */
-  color: string;
-  /** Soft tint used for the ambient background of this section. */
-  tint: string;
-  /** One-line Italian mood/intention for the section. */
+  /** Italian common name (e.g. "Chakra della radice"). */
+  name: string;
+  /** Traditional number of lotus petals. */
+  petals: number;
+  /** Bija (seed) mantra. */
+  bija: string;
+  /** Italian element name. */
+  element: string;
+  /** Where the chakra sits in the body, in Italian. */
+  place: string;
+  /** Inner geometry of the lotus. */
+  geometry: ChakraGeometry;
+  /** Luminous hue for glows, glyphs, streaks and dots. */
+  light: string;
+  /** Light tone for text and accents on dark backgrounds. */
+  soft: string;
+  /** Dark saturated base color of the light tunnel. */
+  deep: string;
+  /** One-line Italian intention for the section. */
   intention: string;
 }
 
@@ -35,8 +57,15 @@ export const CHAKRAS: readonly Chakra[] = [
     section: "benvenuto",
     label: "Benvenuto",
     sanskrit: "Muladhara",
-    color: "#c0392b",
-    tint: "#fdecea",
+    name: "Chakra della radice",
+    petals: 4,
+    bija: "LAM",
+    element: "Terra",
+    place: "Base della colonna",
+    geometry: "square",
+    light: "#e0433a",
+    soft: "#f0928c",
+    deep: "#2c0709",
     intention: "Radici, presenza, un luogo sicuro dove iniziare.",
   },
   {
@@ -44,8 +73,15 @@ export const CHAKRAS: readonly Chakra[] = [
     section: "servizi",
     label: "Servizi",
     sanskrit: "Svadhisthana",
-    color: "#d35400",
-    tint: "#fdeede",
+    name: "Chakra sacrale",
+    petals: 6,
+    bija: "VAM",
+    element: "Acqua",
+    place: "Basso ventre",
+    geometry: "crescent",
+    light: "#f2762e",
+    soft: "#f8ae82",
+    deep: "#2e1204",
     intention: "Cura del corpo e dei sensi, con dolcezza.",
   },
   {
@@ -53,8 +89,15 @@ export const CHAKRAS: readonly Chakra[] = [
     section: "percorso",
     label: "Percorso & News",
     sanskrit: "Manipura",
-    color: "#c9a227",
-    tint: "#fbf6e3",
+    name: "Chakra del plesso solare",
+    petals: 10,
+    bija: "RAM",
+    element: "Fuoco",
+    place: "Plesso solare",
+    geometry: "triangle",
+    light: "#f2c230",
+    soft: "#f8dc85",
+    deep: "#2a1f03",
     intention: "Crescita personale e professionale, passo dopo passo.",
   },
   {
@@ -62,8 +105,15 @@ export const CHAKRAS: readonly Chakra[] = [
     section: "corsi",
     label: "Corsi",
     sanskrit: "Anahata",
-    color: "#27ae60",
-    tint: "#e9f7ef",
+    name: "Chakra del cuore",
+    petals: 12,
+    bija: "YAM",
+    element: "Aria",
+    place: "Centro del petto",
+    geometry: "hexagram",
+    light: "#3dbb73",
+    soft: "#8fdcae",
+    deep: "#052516",
     intention: "Imparare insieme, condividere, connettersi.",
   },
   {
@@ -71,8 +121,15 @@ export const CHAKRAS: readonly Chakra[] = [
     section: "contatti",
     label: "Contatti & Prenota",
     sanskrit: "Vishuddha",
-    color: "#2980b9",
-    tint: "#e8f2fb",
+    name: "Chakra della gola",
+    petals: 16,
+    bija: "HAM",
+    element: "Etere",
+    place: "Gola",
+    geometry: "circle",
+    light: "#3a9be0",
+    soft: "#8cc6f0",
+    deep: "#041a31",
     intention: "Parlarsi, incontrarsi, prenotare il tuo momento.",
   },
 ] as const;
@@ -80,3 +137,12 @@ export const CHAKRAS: readonly Chakra[] = [
 export const CHAKRA_BY_SECTION: Record<string, Chakra> = Object.fromEntries(
   CHAKRAS.map((c) => [c.section, c]),
 );
+
+/** CSS custom properties a chakra-themed element exposes to its children. */
+export function chakraVars(chakra: Chakra): React.CSSProperties {
+  return {
+    ["--accent" as string]: chakra.soft,
+    ["--glow" as string]: chakra.light,
+    ["--deep" as string]: chakra.deep,
+  };
+}

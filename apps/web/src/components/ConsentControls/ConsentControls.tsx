@@ -17,22 +17,22 @@ export function ConsentControls() {
   const { status, ready, accept, reject } = useConsent();
 
   return (
-    <div className="rounded-2xl border border-black/5 bg-white/80 p-5 shadow-sm">
-      <p className="text-sm text-neutral-700">
+    <div className="rounded-2xl border border-white/10 bg-[#0c0812]/70 p-5 shadow-sm">
+      <p className="text-sm text-white/80">
         Stato attuale: <strong>{ready ? LABELS[status] : "…"}</strong>
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={accept}
-          className="rounded-full bg-neutral-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
+          className="rounded-full bg-white px-5 py-2 text-sm font-medium text-[#140d17] transition hover:bg-white/85"
         >
           Accetta statistiche
         </button>
         <button
           type="button"
           onClick={reject}
-          className="rounded-full border border-neutral-300 px-5 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100"
+          className="rounded-full border border-white/20 px-5 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
         >
           Rifiuta statistiche
         </button>

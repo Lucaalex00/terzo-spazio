@@ -15,6 +15,24 @@ export function buildWhatsAppUrl(message: string): string | null {
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
 
+/**
+ * Human-readable phone number from the WhatsApp digits, e.g.
+ * "393331234567" → "+39 333 123 4567". Returns "" when no number is set.
+ */
+export function phoneDisplay(): string {
+  const digits = site.whatsappNumber.replace(/\D/g, "");
+  if (!digits) return "";
+  const national = digits.startsWith("39") ? digits.slice(2) : digits;
+  const groups = [national.slice(0, 3), national.slice(3, 6), national.slice(6)].filter(Boolean);
+  return `+39 ${groups.join(" ")}`;
+}
+
+/** tel: link for the same number. */
+export function phoneHref(): string {
+  const digits = site.whatsappNumber.replace(/\D/g, "");
+  return digits ? `tel:+${digits}` : "";
+}
+
 /** A prepared message for a generic contact. */
 export function genericMessage(): string {
   return `Ciao Giulia! Ho visto il sito di ${site.shortName} e vorrei qualche informazione.`;

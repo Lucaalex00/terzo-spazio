@@ -32,8 +32,9 @@ export function BookingBridge() {
   const external = Boolean(site.bookingUrl);
 
   return (
-    <div className="rounded-2xl border border-black/5 bg-white/80 p-5 shadow-sm backdrop-blur sm:p-6">
-      <p className="text-sm text-neutral-600">
+    <div className="chakra-card p-6">
+      <h3 className="font-display text-xl text-white">Prenota il tuo momento</h3>
+      <p className="mt-2 text-pretty text-sm leading-relaxed text-white/70">
         Scegli un servizio e, se vuoi, aggiungi una nota. Ti porteremo{" "}
         {external ? "all'app di prenotazione" : "su WhatsApp con un messaggio già pronto"} — la
         prenotazione vera e propria la gestisce Giulia direttamente.
@@ -41,11 +42,11 @@ export function BookingBridge() {
 
       <div className="mt-4 grid gap-4">
         <label className="grid gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Servizio</span>
+          <span className="font-medium text-white/90">Servizio</span>
           <select
             value={serviceSlug}
             onChange={(e) => setServiceSlug(e.target.value)}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-black/10"
+            className="field"
           >
             {services.map((s) => (
               <option key={s.slug} value={s.slug}>
@@ -57,34 +58,27 @@ export function BookingBridge() {
 
         {!external && (
           <label className="grid gap-1 text-sm">
-            <span className="font-medium text-neutral-800">Nota (facoltativa)</span>
+            <span className="font-medium text-white/90">Nota (facoltativa)</span>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               placeholder="Es. preferirei il sabato mattina"
-              className="resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-black/10"
+              className="field resize-none"
             />
           </label>
         )}
 
         {href ? (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-            style={{ backgroundColor: "var(--accent)" }}
-          >
+          <a href={href} target="_blank" rel="noopener noreferrer" className="btn-primary w-full">
+            <span aria-hidden className="btn-sheen" />
             {external ? "Vai a prenotare" : "Scrivi su WhatsApp"}
           </a>
         ) : (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-white/55">
             Canale di contatto non ancora configurato. Imposta
-            <code className="mx-1 rounded bg-neutral-100 px-1">
-              NEXT_PUBLIC_WHATSAPP_NUMBER
-            </code>o{" "}
-            <code className="mx-1 rounded bg-neutral-100 px-1">NEXT_PUBLIC_BOOKING_URL</code>.
+            <code className="mx-1 rounded bg-white/10 px-1">NEXT_PUBLIC_WHATSAPP_NUMBER</code>o{" "}
+            <code className="mx-1 rounded bg-white/10 px-1">NEXT_PUBLIC_BOOKING_URL</code>.
           </p>
         )}
       </div>
